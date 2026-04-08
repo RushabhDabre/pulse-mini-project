@@ -44,8 +44,8 @@ module.exports = (io) => {
     async (req, res) => {
       try {
         const video = new Video({
+          originalname: req.body.originalname || req.file.originalname,
           filename: req.file.filename,
-          originalname: req.file.originalname,
           mimetype: req.file.mimetype,
           uploadedBy: req.user.userId,
         });
@@ -187,14 +187,6 @@ module.exports = (io) => {
 
       if (!video) {
         return res.status(404).json({ message: "Video not found" });
-      }
-
-      // admin can edit any, user can edit only own
-      if (
-        video.uploadedBy.toString() !== req.user.userId &&
-        req.user.role !== "admin"
-      ) {
-        return res.status(403).json({ message: "Not allowed" });
       }
 
       video.originalname = req.body.originalname || video.originalname;
