@@ -109,6 +109,16 @@ module.exports = (io) => {
       const fileSize = stat.size;
       const range = req.headers.range;
 
+      const mimeTypes = {
+        ".mp4": "video/mp4",
+        ".mov": "video/mp4",
+        ".avi": "video/x-msvideo",
+        ".mkv": "video/x-matroska",
+        ".webm": "video/webm",
+      };
+      const ext = path.extname(video.filename).toLowerCase();
+      const contentType = mimeTypes[ext] || video.mimetype || "video/mp4";
+
       if (range) {
         const [startStr, endStr] = range.replace(/bytes=/, "").split("-");
         const start = parseInt(startStr, 10);
@@ -119,14 +129,14 @@ module.exports = (io) => {
           "Content-Range": `bytes ${start}-${end}/${fileSize}`,
           "Accept-Ranges": "bytes",
           "Content-Length": chunkSize,
-          "Content-Type": video.mimetype || "video/mp4",
+          "Content-Type": contentType,
         });
 
         fs.createReadStream(videoPath, { start, end }).pipe(res);
       } else {
         res.writeHead(200, {
           "Content-Length": fileSize,
-          "Content-Type": video.mimetype || "video/mp4",
+          "Content-Type": contentType,
         });
 
         fs.createReadStream(videoPath).pipe(res);
@@ -144,9 +154,10 @@ module.exports = (io) => {
       if (!video) {
         return res.status(404).json({ message: "Video not found" });
       }
-    
+
       // handle null uploadedBy
-      const isOwner = video.uploadedBy && video.uploadedBy.toString() === req.user.userId;
+      const isOwner =
+        video.uploadedBy && video.uploadedBy.toString() === req.user.userId;
       const isAdmin = req.user.role === "admin";
 
       if (!isOwner && !isAdmin) {
