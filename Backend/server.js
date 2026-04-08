@@ -30,9 +30,9 @@ app.use(cors({
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
-const videoRoutes = require("./routes/videoRoutes");
-const authRoutes = require("./routes/authRoutes");
-const adminRoutes = require("./routes/adminRoutes");
+const videoRoutes = require("./Routes/videoRoutes");
+const authRoutes = require("./Routes/authRoutes");
+const adminRoutes = require("./Routes/adminRoutes");
 
 app.use("/api/videos", videoRoutes(io));
 app.use("/api/auth", authRoutes);

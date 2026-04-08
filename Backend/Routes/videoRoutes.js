@@ -2,8 +2,8 @@ const express = require("express");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
-const Video = require("../models/Video");
-const { authenticate, isAdmin } = require("../middleware/auth");
+const Video = require("../Models/Video");
+const { authenticate, isAdmin } = require("../Middleware/auth");
 
 module.exports = (io) => {
   const router = express.Router();
