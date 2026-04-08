@@ -8,7 +8,7 @@ const { Server } = require("socket.io");
 const allowedOrigins = [
   "http://localhost:5173",
   process.env.FRONTEND_URL  // vercel URL added later
-];
+].filter(Boolean);
 
 const app = express();
 const httpServer = createServer(app);
@@ -39,7 +39,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URL)
   .then(() => {
     console.log("MongoDB connected");
     httpServer.listen(process.env.PORT, () => {
