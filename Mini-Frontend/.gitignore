@@ -24,10 +24,6 @@ dist-ssr
 *.sw?
 
 node_modules/
-Backend/node_modules/
 Mini-Frontend/node_modules/
 Mini-Frontend/dist/
-Backend/.env
 Mini-Frontend/.env
-Backend/uploads/*
-!Backend/uploads/.gitkeep

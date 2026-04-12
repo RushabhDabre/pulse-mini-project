@@ -1,11 +1,11 @@
-const express = require("express");
-const multer = require("multer");
-const fs = require("fs");
-const path = require("path");
-const Video = require("../Models/Video");
-const { authenticate, isAdmin } = require("../Middleware/auth");
+import express from "express";
+import multer from "multer";
+import fs from "fs";
+import path from "path";
+import Video from "../Models/Video.js";
+import { authenticate } from "../Middleware/auth.js";
 
-module.exports = (io) => {
+export default (io) => {
   const router = express.Router();
 
   // storage config
