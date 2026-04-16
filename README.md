@@ -16,7 +16,7 @@
     3.	Create .env file in Backend/:
           MONGO_URI=your_mongodb_connection_string_here
           PORT=5000
-          JWT_SECRET=your_secret_key_here
+          ACCESS_TOKEN_SECRET=your_secret_key_here
           FRONTEND_URL=http://localhost:5173 or whatever port you use
     4.	Start the backend server: node server.js
     5.	Expected output:
@@ -33,13 +33,13 @@
     5.	Open browser at:  http://localhost:5173
 
   1.5 Environment Variables Reference
-    Variable            Location             Description
-    MONGO_URI       :  Backend/.env          MongoDB connection string
-    PORT            :  Backend/.env          Backend server port
-    JWT_SECRET      :  Backend/.env          Secret key for JWT signing
-    FRONTEND_URL    :  Backend/.env          Allowed frontend origin for CORS
-    VITE_API_URL    :  Mini-Frontend/.env    Backend 
-    VITE_SOCKET_URL :  Mini-Frontend/.env    Socket.io server URL
+    Variable                      Location             Description
+    MONGO_URI                :  Backend/.env          MongoDB connection string
+    PORT                     :  Backend/.env          Backend server port
+    ACCESS_TOKEN_SECRET      :  Backend/.env          Secret key for JWT signing
+    FRONTEND_URL             :  Backend/.env          Allowed frontend origin for CORS
+    VITE_API_URL             :  Mini-Frontend/.env    Backend 
+    VITE_SOCKET_URL          :  Mini-Frontend/.env    Socket.io server URL
     
 2. API Documentation
     Base URL (Production):  https://pulse-backend.onrender.com/api
@@ -69,7 +69,7 @@
     •	Headers: Authorization: Bearer <token>
     •	Content-Type: multipart/form-data
     •	Body: video: <file> (MP4, MOV, AVI, MKV - max 100MB)
-    •	Response (200): { "_id": "...", "filename": "1712345-video.mp4", "originalname": "video.mp4", "status": "processing", "sensitivity": "pending", "uploadedBy": "..." }
+    •	Response (200): { "_id": "...", "title": "1712345-video.mp4", "originalname": "video.mp4", "status": "processing", "sensitivity": "pending", "uploadedBy": "..." }
 
   GET /videos/stream/:id
     •	Stream video content using HTTP range requests for efficient playback.

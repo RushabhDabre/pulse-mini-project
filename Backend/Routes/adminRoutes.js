@@ -1,5 +1,5 @@
 import express from "express";
-import User from "../Models/User.js";
+import { User } from "../Models/User.js";
 import { authenticate, isAdmin } from "../Middleware/auth.js";
 
 const router = express.Router();
@@ -30,7 +30,7 @@ router.put("/users/:id/role", authenticate, isAdmin, async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { role },
-      { new: true }
+      { new: true },
     ).select("-password");
 
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -46,7 +46,9 @@ router.delete("/users/:id", authenticate, isAdmin, async (req, res) => {
   try {
     // prevent admin from deleting themselves
     if (req.params.id === req.user.userId) {
-      return res.status(400).json({ message: "Cannot delete your own account" });
+      return res
+        .status(400)
+        .json({ message: "Cannot delete your own account" });
     }
 
     const user = await User.findByIdAndDelete(req.params.id);

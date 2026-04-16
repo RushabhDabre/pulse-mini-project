@@ -2,7 +2,7 @@ import express from "express";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
-import Video from "../Models/Video.js";
+import { Video } from "../Models/Video.js";
 import { authenticate } from "../Middleware/auth.js";
 
 export default (io) => {
@@ -45,7 +45,7 @@ export default (io) => {
       try {
         const video = new Video({
           originalname: req.body.originalname || req.file.originalname,
-          filename: req.file.filename,
+          title: req.file.filename,
           mimetype: req.file.mimetype,
           uploadedBy: req.user.userId,
         });
@@ -101,7 +101,7 @@ export default (io) => {
       const video = await Video.findById(req.params.id);
       if (!video) return res.status(404).json({ message: "Video not found" });
 
-      const videoPath = path.resolve("uploads", video.filename);
+      const videoPath = path.resolve("uploads", video.title);
       if (!fs.existsSync(videoPath))
         return res.status(404).json({ message: "File not found on server" });
 
@@ -116,7 +116,7 @@ export default (io) => {
         ".mkv": "video/x-matroska",
         ".webm": "video/webm",
       };
-      const ext = path.extname(video.filename).toLowerCase();
+      const ext = path.extname(video.title).toLowerCase();
       const contentType = mimeTypes[ext] || video.mimetype || "video/mp4";
 
       if (range) {

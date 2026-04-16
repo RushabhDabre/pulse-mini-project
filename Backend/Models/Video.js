@@ -1,8 +1,16 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const videoSchema = new mongoose.Schema(
+const videoSchema = new Schema(
   {
-    filename: { type: String, required: true },
+    videoFile: {
+      type: String, //cloudinary url
+      required: true,
+    },
+    thumbnail: {
+      type: String, //cloudinary url
+      required: true,
+    },
+    title: { type: String, required: true },
     originalname: { type: String, required: true },
     mimetype: { type: String },
     size: { type: Number },
@@ -20,11 +28,9 @@ const videoSchema = new mongoose.Schema(
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      default: null,
     },
-    createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true },
 );
 
-export default mongoose.model("Video", videoSchema);
+export const Video = mongoose.model("Video", videoSchema);
