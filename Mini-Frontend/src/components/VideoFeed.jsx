@@ -34,6 +34,7 @@ export default function VideoFeed({
   const [editOpen, setEditOpen] = useState(false);
   const [editVideo, setEditVideo] = useState(null);
   const [editName, setEditName] = useState("");
+  const [editDesc, setEditDesc] = useState("");
   const [playVideo, setPlayVideo] = useState(null);
 
   function canEdit(video) {
@@ -54,6 +55,7 @@ export default function VideoFeed({
   function openEdit(video) {
     setEditVideo(video);
     setEditName(video.originalname);
+    setEditDesc(video.description || "");
     setEditOpen(true);
   }
 
@@ -64,7 +66,7 @@ export default function VideoFeed({
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ originalname: editName }),
+      body: JSON.stringify({ title: editName, description: editDesc }),
     });
     setEditOpen(false);
     onRefresh();
@@ -149,33 +151,80 @@ export default function VideoFeed({
                   justifyContent: "center",
                 }}
               >
-                {v.status === "completed" &&
-                (v.sensitivity !== "flagged" || user?.role === "admin") ? (
-                  <IconButton
-                    onClick={() => setPlayVideo(v)}
+                {v.thumbnailUrl ? (
+                  <Box
+                    component="img"
+                    src={v.thumbnailUrl}
                     sx={{
-                      bgcolor: "rgba(108,99,255,0.8)",
-                      "&:hover": { bgcolor: "primary.main" },
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      opacity: v.status === "processing" ? 0.4 : 0.8,
+                    }}
+                  />
+                ) : (
+                  // fallback — dark background with video icon
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      bgcolor: "#1a1a2e",
                     }}
                   >
-                    <PlayArrowIcon sx={{ fontSize: 36 }} />
-                  </IconButton>
-                ) : (
-                  <Typography variant="caption" color="text.secondary">
-                    {v.status === "processing"
-                      ? "Processing..."
-                      : "Flagged Content"}
-                  </Typography>
+                    <PlayArrowIcon sx={{ fontSize: 48, color: "#333" }} />
+                  </Box>
                 )}
-              </Box>
 
-              {/* Progress bar during processing */}
-              {v.status === "processing" && (
-                <LinearProgress
-                  variant={v.progress ? "determinate" : "indeterminate"}
-                  value={v.progress || 0}
-                />
-              )}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {v.status === "processing" ? (
+                    <Box sx={{ textAlign: "center" }}>
+                      <Typography
+                        variant="caption"
+                        color="white"
+                        display="block"
+                      >
+                        Processing...
+                      </Typography>
+                      <LinearProgress
+                        sx={{ mt: 1, width: 80, borderRadius: 99 }}
+                        variant={v.progress ? "determinate" : "indeterminate"}
+                        value={v.progress || 0}
+                      />
+                    </Box>
+                  ) : v.sensitivity === "flagged" && user?.role !== "admin" ? (
+                    <Box sx={{ textAlign: "center", px: 1 }}>
+                      <Typography
+                        variant="caption"
+                        color="error"
+                        display="block"
+                      >
+                        ⚠ Flagged Content
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <IconButton
+                      onClick={() => setPlayVideo(v)}
+                      sx={{
+                        bgcolor: "rgba(108,99,255,0.8)",
+                        "&:hover": { bgcolor: "primary.main" },
+                      }}
+                    >
+                      <PlayArrowIcon sx={{ fontSize: 36 }} />
+                    </IconButton>
+                  )}
+                </Box>
+              </Box>
 
               <CardContent sx={{ pb: "12px !important" }}>
                 <Typography
@@ -186,6 +235,11 @@ export default function VideoFeed({
                 >
                   {v.originalname}
                 </Typography>
+                {v.description && (
+                  <Typography variant="caption" color="text.secondary" noWrap>
+                    {v.description}
+                  </Typography>
+                )}
                 <Box
                   sx={{
                     display: "flex",
@@ -228,7 +282,7 @@ export default function VideoFeed({
               preload="metadata"
               autoPlay
               style={{ width: "100%", borderRadius: 8 }}
-              src={`${API}/videos/stream/${playVideo._id}`}
+              src={playVideo.videoUrl}
             />
           )}
         </DialogContent>
@@ -242,15 +296,24 @@ export default function VideoFeed({
         fullWidth
         PaperProps={{ sx: { borderRadius: 3 } }}
       >
-        <DialogTitle>Rename Video</DialogTitle>
+        <DialogTitle>Edit Video</DialogTitle>
         <DialogContent>
           <TextField
             fullWidth
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
-            label="Video name"
+            label="Video title"
             size="small"
             sx={{ mt: 1 }}
+          />
+          <TextField
+            fullWidth
+            value={editDesc}
+            onChange={(e) => setEditDesc(e.target.value)}
+            label="Description"
+            size="small"
+            multiline
+            rows={5}
           />
         </DialogContent>
         <DialogActions>

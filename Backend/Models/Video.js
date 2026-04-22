@@ -2,19 +2,22 @@ import mongoose, { Schema } from "mongoose";
 
 const videoSchema = new Schema(
   {
-    videoFile: {
+    videoUrl: {
       type: String, //cloudinary url
       required: true,
     },
-    thumbnail: {
+    publicId: {
       type: String, //cloudinary url
-      required: true,
     },
+    thumbnailUrl: { type: String, default: "" }, // thumbnail URL
+    thumbnailPublicId: { type: String, default: "" }, // for deletion
     title: { type: String, required: true },
+    description: { type: String, default: "" },
     originalname: { type: String, required: true },
     mimetype: { type: String },
     size: { type: Number },
     duration: { type: Number },
+    reason: { type: String, default: "" },
     status: {
       type: String,
       enum: ["processing", "completed", "failed"],
@@ -25,9 +28,11 @@ const videoSchema = new Schema(
       enum: ["pending", "safe", "flagged"],
       default: "pending",
     },
+    isPublished: { type: Boolean, default: true },
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      default: null,
     },
   },
   { timestamps: true },

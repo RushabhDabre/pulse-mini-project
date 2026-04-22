@@ -40,7 +40,7 @@ export default function AuthModal({ open, onClose, onLogin, API }) {
         return;
       }
 
-      onLogin(data.user, data.token);
+      onLogin(data?.data?.user, data?.data?.accessToken);
     } catch {
       setError("Server error. Is backend running?");
     } finally {

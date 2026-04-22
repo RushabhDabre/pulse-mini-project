@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 
@@ -7,19 +9,39 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const uploadOnCloudinary = async (localFilePath) => {
+export const uploadOnCloudinary = async (
+  localFilePath,
+  resourceType = "auto",
+) => {
   try {
     if (!localFilePath) return null;
 
     const response = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: "auto",
+      resource_type: resourceType,
     });
 
     fs.unlinkSync(localFilePath); //to remove from local system after uploading to cloudinary
 
     return response;
   } catch (e) {
-    fs.unlinkSync(localFilePath); // remove the locally saved temporary file as the upload operation got failed
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath);
+    }
+    return null;
+  }
+};
+
+export const deleteFromCloudinary = async (
+  publicId,
+  resourceType = "video",
+) => {
+  try {
+    const result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: resourceType,
+    });
+    return result;
+  } catch (err) {
+    console.error("Cloudinary delete error:", err.message);
     return null;
   }
 };

@@ -10,12 +10,18 @@ export const storage = multer.diskStorage({
   },
 });
 
+const videoFilter = (req, file, cb) => {
+  if (file.fieldname === "video" && !file.mimetype.startsWith("video/")) {
+    return cb(new Error("Only video files allowed"), false);
+  }
+  if (file.fieldname === "thumbnail" && !file.mimetype.startsWith("image/")) {
+    return cb(new Error("Only image files allowed for thumbnail"), false);
+  }
+  cb(null, true);
+};
+
 export const upload = multer({
   storage,
-  fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("video/"))
-      return cb(new Error("Only Video files allowed"), false);
-    cb(null, true);
-  },
+  fileFilter: videoFilter,
   limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
 });

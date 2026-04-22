@@ -1,8 +1,11 @@
+import dotenv from "dotenv";
+dotenv.config({ path: "./.env" });
+
 import express from "express";
 import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
-import cookieParser from "cookie-parser"
+import cookieParser from "cookie-parser";
 
 //routes import
 import videoRoutes from "./Routes/videoRoutes.js";
@@ -42,4 +45,4 @@ app.use("/api/videos", videoRoutes(io));
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 
-export { app, httpServer };
+export { app, httpServer, io };

@@ -13,10 +13,20 @@ import { API } from "../config";
 export default function UploadSection({ token, onUploaded }) {
   const [file, setFile] = useState(null);
   const [videoName, setVideoName] = useState("");
+  const [description, setDescription] = useState("");
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [thumbnail, setThumbnail] = useState(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState(null);
+  const thumbnailRef = useRef();
   const inputRef = useRef();
+
+  function handleThumbnail(e) {
+    const file = e.target.files[0];
+    setThumbnail(file);
+    setThumbnailPreview(URL.createObjectURL(file)); // preview
+  }
 
   function handleFile(e) {
     const selected = e.target.files[0];
@@ -27,16 +37,19 @@ export default function UploadSection({ token, onUploaded }) {
 
   function uploadVideo() {
     if (!file) return;
-    // if (!videoName.trim()) {
-    //   setError("Please enter a video name.");
-    //   return;
-    // }
+    if (!videoName.trim()) {
+      setError("Please enter a video name.");
+      return;
+    }
     setUploading(true);
     setError("");
 
     const formData = new FormData();
-    formData.append("videoName", videoName);
+    formData.append("title", videoName.trim());
+    formData.append("description", (description || "").trim());
+    // optional
     formData.append("video", file);
+    if (thumbnail) formData.append("thumbnail", thumbnail); // optional
 
     const xhr = new XMLHttpRequest();
     xhr.open("POST", `${API}/videos/upload`);
@@ -107,7 +120,7 @@ export default function UploadSection({ token, onUploaded }) {
           </Typography>
         )}
 
-        {/*{file && (
+        {file && (
           <TextField
             fullWidth
             label="Video Name"
@@ -117,7 +130,58 @@ export default function UploadSection({ token, onUploaded }) {
             sx={{ mb: 1.5 }}
             placeholder="Enter a name for your video"
           />
-        )}*/}
+        )}
+
+        {file && (
+          <TextField
+            fullWidth
+            label="Description (optional)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            size="small"
+            multiline
+            rows={2}
+            sx={{ mb: 1.5 }}
+            placeholder="Add a description..."
+          />
+        )}
+
+        {file && (
+          <>
+            <input
+              ref={thumbnailRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleThumbnail}
+              id="thumbnail-input"
+            />
+            <label htmlFor="thumbnail-input">
+              <Button
+                component="span"
+                variant="text"
+                size="small"
+                sx={{ mb: 1 }}
+              >
+                {thumbnail ? "Change Thumbnail" : "Upload Thumbnail (optional)"}
+              </Button>
+            </label>
+
+            {thumbnailPreview && (
+              <Box
+                component="img"
+                src={thumbnailPreview}
+                sx={{
+                  width: "100%",
+                  height: 140,
+                  objectFit: "cover",
+                  borderRadius: 2,
+                  mb: 1.5,
+                }}
+              />
+            )}
+          </>
+        )}
 
         {file && (
           <Button

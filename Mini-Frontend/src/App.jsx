@@ -8,7 +8,11 @@ import UploadSection from "./components/UploadSection";
 import VideoFeed from "./components/VideoFeed";
 import AdminPanel from "./components/AdminPanel";
 
-const socket = io(SOCKET_URL);
+const socket = io(SOCKET_URL, {
+  transports: ["websocket", "polling"], // ✅ explicitly set
+  reconnection: true,
+  reconnectionAttempts: 5,
+});
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -28,11 +32,19 @@ export default function App() {
 
     socket.on("videoStatus", (data) => {
       setVideos((prev) =>
-        prev.map((v) =>
-          v._id === data.videoId
-            ? { ...v, status: data.status, sensitivity: data.sensitivity, progress: data.progress }
-            : v
-        )
+        prev.map((v) => {
+          const match = v._id.toString() === data.videoId.toString();
+          return match
+            ? {
+                ...v,
+                status: data.status,
+                sensitivity: data.sensitivity,
+                progress: data.progress,
+                reason: data.reason || v.reason,
+                thumbnailUrl: data.thumbnailUrl || v.thumbnailUrl,
+              }
+            : v;
+        }),
       );
     });
 
@@ -41,11 +53,13 @@ export default function App() {
 
   async function loadVideos() {
     try {
-      const res = await fetch(`${API}/videos`);
+      const res = await fetch(`${API}/videos`, {
+        headers: { "Cache-Control": "no-cache" },
+      });
       const data = await res.json();
-      setVideos(data.reverse());
-    } catch {
-      console.error("Could not load videos");
+      setVideos(data.data.videos.reverse());
+    } catch (e) {
+      console.error("Could not load videos", e);
     }
   }
 
@@ -65,12 +79,12 @@ export default function App() {
     setTab("all");
   }
 
-  const filteredVideos = videos.filter((v) =>
-    v.originalname.toLowerCase().includes(search.toLowerCase())
+  const filteredVideos = videos?.filter((v) =>
+    v.originalname.toLowerCase().includes(search.toLowerCase()),
   );
 
   const myVideos = filteredVideos.filter(
-    (v) => v.uploadedBy?._id === user?.id || v.uploadedBy === user?.id
+    (v) => v.uploadedBy?._id === user?.id || v.uploadedBy === user?.id,
   );
 
   const displayedVideos = tab === "all" ? filteredVideos : myVideos;
@@ -87,12 +101,7 @@ export default function App() {
       />
 
       <Box sx={{ maxWidth: 1200, mx: "auto", px: 3, pt: 2 }}>
-        {user && (
-          <UploadSection
-            token={token}
-            onUploaded={loadVideos}
-          />
-        )}
+        {user && <UploadSection token={token} onUploaded={loadVideos} />}
 
         <VideoFeed
           videos={displayedVideos}
